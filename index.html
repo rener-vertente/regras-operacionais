@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual de Operação · Vertente Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EBEEF2; --surface:#FFFFFF; --surface-2:#F6F8FA;
+    --ink:#15202E; --ink-soft:#47586B; --ink-faint:#8494A5;
+    --line:#E1E7ED; --line-strong:#CDD6DF;
+    --navy:#122238; --navy-2:#1B3149;
+
+    --chat:#2E6FD6; --dem:#C2410C; --doc:#7C3AED;
+    --diario:#0E7C6B; --acessos:#5C6B7A; --cal:#D6336C;
+
+    --rener:#DE8A2C; --silvio:#158D99; --carol:#E0654A; --joao:#3E9B63;
+    --shared:#5A6B7E;
+
+    --accent:var(--navy);
+    --radius:14px; --radius-sm:9px;
+    --shadow:0 1px 2px rgba(18,34,56,.04),0 8px 24px -12px rgba(18,34,56,.14);
+    --mono:"IBM Plex Mono",monospace;
+    --sans:"IBM Plex Sans",system-ui,sans-serif;
+    --disp:"Space Grotesk",var(--sans);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans);background:var(--bg);color:var(--ink);
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:#fff}
+
+  .app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+
+  /* ---------- SIDEBAR ---------- */
+  .side{
+    background:var(--navy);color:#C6D2DE;position:sticky;top:0;height:100vh;
+    display:flex;flex-direction:column;padding:26px 18px;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:baseline;gap:8px;padding:0 8px 4px}
+  .brand b{font-family:var(--disp);font-weight:700;font-size:19px;color:#fff;letter-spacing:-.02em}
+  .brand span{font-family:var(--mono);font-size:10px;color:#6E8398;letter-spacing:.14em;text-transform:uppercase}
+  .brand-sub{font-family:var(--mono);font-size:10.5px;color:#6E8398;letter-spacing:.1em;text-transform:uppercase;padding:0 8px 20px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+
+  .nav-label{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:#5E7488;padding:14px 8px 7px}
+  .nav-btn{
+    width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    color:#B4C2D0;font-family:var(--sans);font-size:14.5px;font-weight:500;
+    padding:9px 10px;border-radius:9px;display:flex;align-items:center;gap:10px;
+    transition:background .15s,color .15s;line-height:1.2;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-btn .dot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--d,#5A6B7E)}
+  .nav-btn.active{background:rgba(255,255,255,.10);color:#fff;font-weight:600}
+  .nav-btn.active .dot{box-shadow:0 0 0 3px color-mix(in srgb,var(--d) 30%,transparent)}
+  .nav-role{font-family:var(--mono);font-size:9.5px;color:#677C91;letter-spacing:.04em;margin-left:auto}
+  .side-foot{margin-top:auto;padding:16px 8px 0;font-family:var(--mono);font-size:10px;color:#54697E;line-height:1.7}
+
+  /* ---------- MAIN ---------- */
+  .main{padding:0;min-width:0}
+  .wrap{max-width:920px;margin:0 auto;padding:38px 46px 90px}
+
+  .view{display:none;animation:fade .35s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* person header */
+  .phead{
+    position:relative;background:var(--surface);border-radius:var(--radius);
+    padding:30px 32px;box-shadow:var(--shadow);overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .phead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent)}
+  .phead .role-tag{
+    font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin-bottom:9px;display:inline-block;
+  }
+  .phead h1{font-family:var(--disp);font-size:34px;font-weight:700;letter-spacing:-.025em;line-height:1.05}
+  .phead .obj{font-size:15.5px;color:var(--ink-soft);margin-top:12px;max-width:60ch}
+  .phead .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .chip{
+    font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:20px;
+    background:var(--surface-2);border:1px solid var(--line-strong);color:var(--ink-soft);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .chip b{color:var(--ink);font-weight:600}
+
+  /* cadence filter */
+  .filter{display:flex;gap:7px;flex-wrap:wrap;margin:26px 0 8px;position:sticky;top:0;
+    background:var(--bg);padding:12px 0;z-index:5}
+  .fbtn{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;cursor:pointer;
+    background:var(--surface);border:1px solid var(--line-strong);color:var(--ink-soft);
+    padding:7px 13px;border-radius:8px;transition:all .15s;font-weight:500;
+  }
+  .fbtn:hover{border-color:var(--accent);color:var(--ink)}
+  .fbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* cadence group */
+  .cad-group{margin-top:30px}
+  .cad-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .cad-head h2{font-family:var(--disp);font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink)}
+  .cad-head .ln{flex:1;height:1px;background:var(--line-strong)}
+  .cad-head .ct{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+
+  /* routine card */
+  .rt{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+    margin-bottom:9px;box-shadow:0 1px 2px rgba(18,34,56,.03);overflow:hidden;transition:border-color .15s}
+  .rt:hover{border-color:var(--line-strong)}
+  .rt.open{border-color:var(--accent)}
+  .rt-head{display:flex;align-items:center;gap:13px;padding:15px 17px;cursor:pointer;user-select:none}
+  .rt-tw{width:22px;height:22px;flex:none;display:flex;align-items:center;justify-content:center;
+    color:var(--ink-faint);transition:transform .2s;font-size:12px}
+  .rt.open .rt-tw{transform:rotate(90deg);color:var(--accent)}
+  .rt-name{font-weight:600;font-size:15px;flex:1;min-width:0}
+  .rt-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .dtag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    padding:3px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .dtag .d{width:7px;height:7px;border-radius:50%;background:var(--dc)}
+  .dtag{background:color-mix(in srgb,var(--dc) 11%,#fff);color:color-mix(in srgb,var(--dc) 62%,#000);
+    border:1px solid color-mix(in srgb,var(--dc) 24%,#fff)}
+  .freq{font-family:var(--mono);font-size:10px;color:var(--ink-faint);white-space:nowrap;padding-left:2px}
+
+  .rt-body{max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .rt.open .rt-body{max-height:640px}
+  .rt-inner{padding:2px 17px 18px 52px;border-top:1px solid var(--line)}
+  .rt-inner>div{margin-top:13px}
+  .rt-inner .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .rt-inner p{font-size:14.5px;color:var(--ink-soft)}
+  .rt-inner p b{color:var(--ink);font-weight:600}
+  .rt-body .none{display:inline-block;font-family:var(--mono);font-size:12px;color:var(--carol)}
+
+  /* como funciona view */
+  .intro-hero{background:var(--navy);color:#fff;border-radius:var(--radius);padding:38px 36px;position:relative;overflow:hidden}
+  .intro-hero::after{content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;
+    background:radial-gradient(circle,rgba(222,138,44,.22),transparent 70%)}
+  .intro-hero .ey{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8CA0B5}
+  .intro-hero h1{font-family:var(--disp);font-size:30px;font-weight:700;letter-spacing:-.02em;margin:12px 0 14px;max-width:22ch;line-height:1.12}
+  .intro-hero p{color:#B9C6D3;font-size:15.5px;max-width:56ch;position:relative}
+  .intro-hero .rule{margin-top:22px;padding:15px 18px;background:rgba(255,255,255,.07);border-radius:10px;
+    border-left:3px solid var(--rener);font-size:14.5px;color:#E5EDF4;position:relative}
+  .intro-hero .rule b{color:#fff}
+
+  .sec{margin-top:34px}
+  .sec>h2{font-family:var(--disp);font-size:15px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+    margin-bottom:15px;display:flex;align-items:center;gap:10px}
+  .sec>h2::before{content:"";width:20px;height:2px;background:var(--accent)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:20px 22px;box-shadow:var(--shadow)}
+  .card + .card{margin-top:11px}
+
+  /* routing table */
+  .route{width:100%;border-collapse:collapse}
+  .route td{padding:11px 8px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:14px}
+  .route tr:last-child td{border-bottom:none}
+  .route td:first-child{color:var(--ink-soft);width:62%}
+  .route td:last-child{text-align:right}
+
+  /* legend grid */
+  .legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .leg{padding:13px 14px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2)}
+  .leg .lh{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .leg .d{width:9px;height:9px;border-radius:50%;background:var(--dc)}
+  .leg .nm{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.04em;color:color-mix(in srgb,var(--dc) 60%,#000)}
+  .leg p{font-size:12.5px;color:var(--ink-soft);line-height:1.4}
+
+  /* pill list (buckets, views) */
+  .plist{display:grid;gap:9px}
+  .pl{display:flex;gap:13px;align-items:flex-start;padding:13px 15px;background:var(--surface-2);border:1px solid var(--line);border-radius:9px}
+  .pl .n{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);flex:none;width:26px;text-align:center;padding-top:1px}
+  .pl .txt>b{display:block;font-size:14.5px;margin-bottom:2px;font-family:var(--disp);font-weight:600;letter-spacing:-.01em}
+  .pl .txt span{font-size:13.5px;color:var(--ink-soft)}
+  .pl .txt span b{color:var(--ink);font-weight:600}
+  .pl .txt code{font-family:var(--mono);font-size:12px;background:#fff;padding:1px 6px;border-radius:5px;border:1px solid var(--line-strong);color:var(--ink)}
+
+  /* warn box (João) */
+  .warn{background:color-mix(in srgb,var(--joao) 7%,#fff);border:1px solid color-mix(in srgb,var(--joao) 28%,#fff);
+    border-radius:var(--radius-sm);padding:20px 22px;margin-top:26px}
+  .warn h3{font-family:var(--disp);font-size:16px;font-weight:600;color:color-mix(in srgb,var(--joao) 55%,#000);display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .warn ul{list-style:none;display:grid;gap:8px}
+  .warn li{display:flex;gap:10px;font-size:14.5px;color:var(--ink-soft);align-items:flex-start}
+  .warn li::before{content:"✕";color:var(--carol);font-weight:700;flex:none;font-family:var(--mono);font-size:13px;margin-top:1px}
+  .warn li b{color:var(--ink);font-weight:600}
+
+  .track{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:20px 22px;margin-top:11px}
+  .track h3{font-family:var(--disp);font-size:15px;font-weight:600;margin-bottom:14px}
+  .steps{display:grid;gap:10px}
+  .step{display:flex;gap:13px;align-items:flex-start}
+  .step .sn{font-family:var(--mono);font-size:11px;font-weight:600;background:var(--joao);color:#fff;
+    width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center}
+  .step.now .sn{background:var(--joao)}
+  .step.next .sn{background:#fff;color:var(--joao);border:1.5px solid var(--joao)}
+  .step .st b{font-size:14.5px;font-family:var(--disp);font-weight:600}
+  .step .st .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--joao);border:1px solid color-mix(in srgb,var(--joao) 35%,#fff);padding:1px 6px;border-radius:5px;margin-left:8px}
+  .step .st span{display:block;font-size:13.5px;color:var(--ink-soft);margin-top:2px}
+
+  /* guide header */
+  .ghead{margin-bottom:4px}
+  .ghead .ey{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600}
+  .ghead h1{font-family:var(--disp);font-size:29px;font-weight:700;letter-spacing:-.02em;margin:9px 0 12px;line-height:1.1}
+  .ghead p{font-size:15.5px;color:var(--ink-soft);max-width:60ch}
+  .ghead p em{font-style:italic;color:var(--ink-soft)}
+
+  /* flow / decision tree */
+  .flow{display:grid;gap:0}
+  .flow-step{display:flex;gap:15px;align-items:flex-start;position:relative;padding-bottom:22px}
+  .flow-step:last-child{padding-bottom:0}
+  .flow-step:not(:last-child)::before{content:"";position:absolute;left:15px;top:36px;bottom:2px;width:2px;background:var(--line-strong)}
+  .flow-num{width:32px;height:32px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-weight:600;font-size:14px;background:var(--accent);color:#fff;z-index:1}
+  .flow-c{flex:1;padding-top:2px;min-width:0}
+  .flow-c .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:3px}
+  .flow-c h3{font-family:var(--disp);font-size:16px;font-weight:600;margin-bottom:5px;letter-spacing:-.01em}
+  .flow-c>p{font-size:14px;color:var(--ink-soft)}
+  .flow-c>p b{color:var(--ink)}
+  .branch{margin-top:11px;display:grid;gap:7px}
+  .br{display:flex;gap:11px;align-items:flex-start;padding:10px 13px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;font-size:13.5px}
+  .br .q{font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;background:var(--accent);flex:none;
+    width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px}
+  .br b{color:var(--ink)}
+  .br span{color:var(--ink-soft)}
+
+  /* comparison table */
+  .cmp{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .cmp th,.cmp td{padding:11px 13px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  .cmp thead th{background:var(--navy);color:#fff;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600}
+  .cmp thead th:first-child{background:var(--navy)}
+  .cmp tbody th{font-weight:600;color:var(--ink-soft);font-size:12px;background:var(--surface-2);width:120px;font-family:var(--mono);letter-spacing:.02em}
+  .cmp tbody td{color:var(--ink-soft)}
+  .cmp tr:last-child th,.cmp tr:last-child td{border-bottom:none}
+  .cmp .yes{color:var(--joao);font-weight:600}
+  .cmp .no{color:var(--carol);font-weight:600}
+
+  /* callout */
+  .callout{padding:15px 17px;border-radius:10px;border:1px solid var(--line);border-left:3px solid var(--accent);
+    background:color-mix(in srgb,var(--accent) 5%,#fff);margin-top:15px}
+  .callout .ct{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:5px}
+  .callout p{font-size:14px;color:var(--ink-soft)}
+  .callout p b{color:var(--ink);font-weight:600}
+  .callout code{font-family:var(--mono);font-size:12.5px;background:#fff;padding:1px 6px;border-radius:5px;border:1px solid var(--line-strong);color:var(--ink)}
+
+  /* example / transcript block */
+  .exch{background:var(--navy);border-radius:10px;padding:16px 18px;margin-top:13px}
+  .exch .exl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#7E93A8;margin-bottom:9px}
+  .exline{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.09);display:flex;gap:12px;align-items:flex-start}
+  .exline:last-child{border-bottom:none}
+  .exline .who{font-family:var(--mono);font-size:10px;font-weight:600;flex:none;width:60px;padding-top:3px;color:#8CA0B5;letter-spacing:.04em}
+  .exline .msg{color:#E5EDF4;font-size:13.5px;line-height:1.5}
+  .exline .msg em{color:#93A6B9;font-style:italic}
+  .pl .txt code{font-family:var(--mono);font-size:12px;background:#fff;padding:1px 6px;border-radius:5px;border:1px solid var(--line-strong);color:var(--ink)}
+
+  /* mobile nav */
+  .mtop{display:none}
+  @media(max-width:860px){
+    .app{grid-template-columns:1fr}
+    .side{display:none}
+    .mtop{display:block;position:sticky;top:0;z-index:20;background:var(--navy);padding:14px 16px 0}
+    .mtop .mb{display:flex;align-items:baseline;gap:8px;padding:0 2px 12px}
+    .mtop .mb b{font-family:var(--disp);color:#fff;font-size:17px;font-weight:700}
+    .mtop .mb span{font-family:var(--mono);font-size:9.5px;color:#6E8398;letter-spacing:.12em;text-transform:uppercase}
+    .mtabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px;-webkit-overflow-scrolling:touch}
+    .mtabs::-webkit-scrollbar{display:none}
+    .mtab{white-space:nowrap;font-family:var(--sans);font-size:13.5px;font-weight:500;color:#B4C2D0;
+      background:rgba(255,255,255,.07);border:none;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;
+      display:flex;align-items:center;gap:7px}
+    .mtab .dot{width:7px;height:7px;border-radius:50%;background:var(--d,#5A6B7E)}
+    .mtab.active{background:var(--bg);color:var(--ink);font-weight:600}
+    .wrap{padding:24px 18px 70px}
+    .phead{padding:24px 22px}
+    .phead h1{font-size:27px}
+    .intro-hero{padding:28px 22px}
+    .intro-hero h1{font-size:24px}
+    .filter{padding:10px 0}
+    .rt-inner{padding-left:24px}
+  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto}}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<div class="mtop">
+  <div class="mb"><b>Vertente</b><span>Manual de Operação</span></div>
+  <div class="mtabs" id="mtabs"></div>
+</div>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand"><b>Vertente</b><span>Digital</span></div>
+    <div class="brand-sub">Manual de Operação</div>
+    <div class="nav-label">O sistema</div>
+    <button class="nav-btn active" data-go="como" style="--d:var(--navy)"><span class="dot" style="background:#7E93A8"></span>Como funciona</button>
+    <div class="nav-label">Guias detalhados</div>
+    <button class="nav-btn" data-go="fluxo" style="--d:var(--dem)"><span class="dot"></span>Nova demanda</button>
+    <button class="nav-btn" data-go="anotar" style="--d:var(--chat)"><span class="dot"></span>Chat, Diário e Doc</button>
+    <button class="nav-btn" data-go="cobranca" style="--d:var(--carol)"><span class="dot"></span>Cobrança e CS</button>
+    <button class="nav-btn" data-go="reuniao" style="--d:var(--doc)"><span class="dot"></span>Reuniões</button>
+    <div class="nav-label">As pessoas</div>
+    <div id="navpeople"></div>
+    <div class="side-foot">
+      Regra de uso interno.<br>Seguir à risca.<br>Revisão mensal na weekly.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="wrap">
+
+      <!-- COMO FUNCIONA -->
+      <section class="view active" id="v-como">
+        <div class="intro-hero">
+          <div class="ey">O sistema em uma frase</div>
+          <h1>Capturar, decidir e executar são momentos separados.</h1>
+          <p>Quase todo problema de operação nasce de misturar os três: alguém vê uma demanda, tenta decidir e tenta fazer no mesmo instante — e não faz nenhum direito. Este manual existe pra manter cada coisa no seu momento e no seu lugar.</p>
+          <div class="rule"><b>Regra de ouro:</b> nada se escreve em dois lugares. Um sistema que pede digitação dupla é abandonado. Cada informação tem um destino, e só um.</div>
+        </div>
+
+        <div class="sec">
+          <h2>Onde vai cada coisa</h2>
+          <div class="card">
+            <table class="route" id="routeTable"></table>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Os 4 destinos</h2>
+          <div class="legend" id="legendGrid"></div>
+        </div>
+
+        <div class="sec">
+          <h2>Os 3 baldes de prazo</h2>
+          <div class="plist">
+            <div class="pl"><div class="n">01</div><div class="txt"><b>Data exata</b><span>Só quando existe um dia obrigatório — reunião marcada, saldo que acaba, entrega combinada. Vai no campo de data.</span></div></div>
+            <div class="pl"><div class="n">02</div><div class="txt"><b>Sexta desta semana</b><span>Precisa sair essa semana mas não tem dia fixo. Marca a sexta. É o "esta semana".</span></div></div>
+            <div class="pl"><div class="n">03</div><div class="txt"><b>Sem data</b><span>Não é urgente. Fica no <b>Backlog</b>, sem prazo. É um backlog consciente, revisado toda semana — não um esquecimento.</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>As 5 lentes (views)</h2>
+          <div class="plist">
+            <div class="pl"><div class="n">◆</div><div class="txt"><b>Precisa de Decisão</b><span>Tarefas sem dono <b>ou</b> sem prazo. Só o Rener usa, 1x por dia. Nada fica órfão.</span></div></div>
+            <div class="pl"><div class="n">◆</div><div class="txt"><b>Minhas Tarefas do Dia</b><span>Dono = eu, prazo hoje ou atrasado. Cada pessoa abre a sua de manhã. É a fila do dia.</span></div></div>
+            <div class="pl"><div class="n">◆</div><div class="txt"><b>Esta Semana</b><span>Prazo nesta semana. Usada na weekly de terça.</span></div></div>
+            <div class="pl"><div class="n">◆</div><div class="txt"><b>Backlog</b><span>Sem prazo. Revisado toda weekly — o que virou relevante, o que morreu.</span></div></div>
+            <div class="pl"><div class="n">◆</div><div class="txt"><b>Por Cliente</b><span>Agrupado por lista. Aberto antes de reunião com o cliente.</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Os 4 status</h2>
+          <div class="plist">
+            <div class="pl"><div class="n">◦</div><div class="txt"><b>A fazer</b><span>Registrada, ainda não começou.</span></div></div>
+            <div class="pl"><div class="n">◦</div><div class="txt"><b>Fazendo</b><span>Em andamento agora.</span></div></div>
+            <div class="pl"><div class="n">◦</div><div class="txt"><b>Aguardando</b><span>A bola está com outra pessoa — o cliente ou um terceiro. Não está parada por nossa causa. É este status que alimenta a view "Aguardando Cliente" da Carol. Veja o guia <b>Cobrança e acompanhamento</b>.</span></div></div>
+            <div class="pl"><div class="n">◦</div><div class="txt"><b>Feita</b><span>Concluída.</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Duas regras que valem pra todo mundo</h2>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft)"><b style="color:var(--ink)">A regra do verbo concreto.</b> Toda tarefa começa com um verbo que dá pra executar sem pensar mais. <code style="font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 6px;border-radius:5px">Resolver a Nobre Fio</code> não é tarefa. <code style="font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 6px;border-radius:5px">Ligar pro Jackson e pedir os acessos do BM</code> é.</p>
+          </div>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft)"><b style="color:var(--ink)">A regra dos 2 minutos.</b> Se a coisa leva menos de 2 minutos, faça agora. Não registre, não agende, não delegue. O custo de gerenciar a tarefa é maior que o de fazê-la.</p>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>A estrutura no ClickUp</h2>
+          <div class="card">
+            <p style="font-size:14px;color:var(--ink-soft);margin-bottom:10px">Três espaços, separados por <b style="color:var(--ink)">permissão</b> — não por organização:</p>
+            <div class="plist">
+              <div class="pl"><div class="n" style="color:var(--silvio)">▚</div><div class="txt"><b>VD · Clientes Vertente</b><span>Clientes completos. Uma pasta por cliente, com a lista <code>DEM</code> e os Docs <code>EST</code> · <code>REU</code> · <code>ACE</code>.</span></div></div>
+              <div class="pl"><div class="n" style="color:var(--rener)">▚</div><div class="txt"><b>AM · Clientes Marcone</b><span>Só operação de tráfego. Mesma estrutura de pasta por cliente.</span></div></div>
+              <div class="pl"><div class="n" style="color:var(--joao)">▚</div><div class="txt"><b>VD · Interno</b><span>Operação, Comercial e Financeiro. É onde vivem as tarefas-mãe recorrentes e o Diário de Demandas. Ninguém de fora vê.</span></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GUIA: NOVA DEMANDA (GTD) -->
+      <section class="view" id="v-fluxo" style="--accent:var(--dem)">
+        <div class="ghead">
+          <div class="ey">O fluxo · GTD aplicado</div>
+          <h1>O caminho de uma nova demanda</h1>
+          <p>Toda demanda — de um grupo, de uma reunião, de uma ideia sua — percorre cinco passos. O erro mais comum é tentar fazer todos ao mesmo tempo. Capturar, decidir e executar são momentos separados.</p>
+        </div>
+
+        <div class="sec">
+          <h2>Os 5 passos</h2>
+          <div class="card">
+            <div class="flow">
+              <div class="flow-step">
+                <div class="flow-num">1</div>
+                <div class="flow-c">
+                  <div class="k">Capturar</div>
+                  <h3>Tirar da cabeça (ou do WhatsApp)</h3>
+                  <p>Sem pensar, sem julgar se é importante. Só registrar. Na Vertente é a varredura da Carol às 8h: ela lê os grupos e joga cada demanda na DEM do cliente com o mínimo — o que é, de qual cliente. Dono e prazo ficam vazios.</p>
+                  <div class="callout"><div class="ct">Critério</div><p>Na dúvida se algo merece virar demanda, <b>capture mesmo assim</b>. Filtrar é o passo 2, não o 1.</p></div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">2</div>
+                <div class="flow-c">
+                  <div class="k">Esclarecer</div>
+                  <h3>Decidir o que aquilo é</h3>
+                  <p>A árvore de decisão — a parte que mais falta hoje. Cada item capturado passa por estas perguntas, em ordem:</p>
+                  <div class="branch">
+                    <div class="br"><span class="q">1</span><span><b>Exige uma ação?</b> Se não: é lixo (apaga), referência (vai pro Doc do cliente) ou algum dia (Backlog, sem prazo).</span></div>
+                    <div class="br"><span class="q">2</span><span><b>Qual a próxima ação concreta?</b> Tem que começar com verbo executável. "Resolver a Nobre Fio" não é ação; "ligar pro Jackson e pedir os acessos" é.</span></div>
+                    <div class="br"><span class="q">3</span><span><b>Leva menos de 2 minutos?</b> Faz agora. Não registra, não agenda.</span></div>
+                    <div class="br"><span class="q">4</span><span><b>Sou eu quem faz?</b> Se não, delega — define o dono. Se sim, adia — define quando.</span></div>
+                    <div class="br"><span class="q">5</span><span><b>Tem data obrigatória?</b> Sim → data exata. Precisa sair essa semana → sexta. Sem urgência → Backlog. (Os 3 baldes.)</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">3</div>
+                <div class="flow-c">
+                  <div class="k">Organizar</div>
+                  <h3>Registrar o resultado da decisão</h3>
+                  <p>Esclarecer é pensar; organizar é registrar o que foi pensado. Na prática: preencher os campos da tarefa — <b>cliente, dono, prazo, status</b>. Compromisso com hora marcada vai no calendário, não no ClickUp. O calendário é sagrado: só entra o que acontece obrigatoriamente naquele dia e hora.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">4</div>
+                <div class="flow-c">
+                  <div class="k">Executar</div>
+                  <h3>Escolher o que fazer agora, com critério</h3>
+                  <p>A ordem de escolha: <b>contexto</b> (o que dá pra fazer onde estou), <b>tempo</b> (tenho 10 min ou 2h?), <b>energia</b> (estratégia às 17h de sexta não sai) e só então <b>prioridade</b>. Prioridade é o último filtro, não o primeiro — por isso priorizar só por urgência não funciona.</p>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-num">5</div>
+                <div class="flow-c">
+                  <div class="k">Refletir</div>
+                  <h3>Manter o sistema confiável</h3>
+                  <p>Se ninguém revisa, o sistema morre — o cérebro para de confiar nele e volta a guardar tudo na cabeça. <b>Diária (2–3 min):</b> olhar "Minhas Tarefas do Dia" e "Precisa de Decisão". <b>Semanal (a weekly):</b> esvaziar o capturado, revisar tudo em Aguardando, varrer o Backlog, olhar o que foi remarcado várias vezes. A revisão semanal é inegociável — é ela que sustenta os outros quatro passos.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Onde isso quebra hoje</h2>
+          <div class="plist">
+            <div class="pl"><div class="n" style="color:var(--dem)">1</div><div class="txt"><b>Captura</b><span>Demanda nasce no grupo e nunca é registrada. → Resolve com a varredura da Carol às 8h.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--dem)">2</div><div class="txt"><b>Esclarecer</b><span>Tarefa vaga ("ver o caso da Lourdes"), sem próxima ação. Ninguém sabe por onde começar. → Resolve com a regra do verbo concreto.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--dem)">4</div><div class="txt"><b>Refletir</b><span>A weekly acontece "quando acontece". → É o furo mais grave: é o passo que sustenta o resto.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--dem)">5</div><div class="txt"><b>Executar</b><span>Prioriza por quem gritou mais alto, não por critério. → Contexto, tempo e energia vêm antes da urgência.</span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GUIA: CHAT, DIÁRIO E DOC -->
+      <section class="view" id="v-anotar" style="--accent:var(--chat)">
+        <div class="ghead">
+          <div class="ey">Onde anotar cada coisa</div>
+          <h1>Chat, Diário e Doc não são a mesma coisa</h1>
+          <p>Parecem, mas fazem trabalhos diferentes. A diferença não é <em>onde</em> ficam — é <b>o que cada um é</b>. Confundir os três é o que gera anotação perdida.</p>
+        </div>
+
+        <div class="sec">
+          <h2>O que cada um é</h2>
+          <div class="plist">
+            <div class="pl"><div class="n"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--chat)"></span></div><div class="txt"><b>Chat da pasta — a conversa do dia</b><span>Cada otimização, dúvida, alerta, no momento em que acontece. Mensagens soltas ao longo do dia, <b>por cliente</b>. É fluxo contínuo, no calor do momento.</span></div></div>
+            <div class="pl"><div class="n"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--diario)"></span></div><div class="txt"><b>Diário de Demandas — o resumo do dia</b><span>Não é conversa. É o gestor parando no fim do dia e escrevendo, num <b>lugar único</b>, o que a Carol precisa saber pra virar ação amanhã. De todos os clientes de uma vez.</span></div></div>
+            <div class="pl"><div class="n"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--doc)"></span></div><div class="txt"><b>Doc — o conhecimento congelado</b><span>Estratégia, atas de reunião, acessos. O que precisa ser <b>reconstruível</b> daqui a meses. Não rola pra cima, não some no meio da conversa.</span></div></div>
+          </div>
+          <div class="callout" style="--accent:var(--diario)"><div class="ct">Por que o Diário existe (e não é só o Chat)</div><p>Se a Carol tivesse que ler o Chat de <b>todos</b> os clientes toda manhã pra achar o que virou pendência, perderia a manhã inteira e ainda deixaria passar coisa no meio da conversa. O Diário é o filtro: um lugar só, com o que importa pra amanhã já destilado. <b>Ele é uma lista no espaço Interno</b> — não é o Chat.</p></div>
+        </div>
+
+        <div class="sec">
+          <h2>Lado a lado</h2>
+          <table class="cmp">
+            <thead><tr><th>&nbsp;</th><th>Chat da pasta</th><th>Diário</th><th>Doc</th></tr></thead>
+            <tbody>
+              <tr><th>O que é</th><td>Conversa do dia</td><td>Resumo do dia</td><td>Conhecimento congelado</td></tr>
+              <tr><th>Quando</th><td>No calor do momento</td><td>Fim do dia</td><td>Ao decidir/registrar</td></tr>
+              <tr><th>Escopo</th><td>Um cliente</td><td>Todos os clientes</td><td>Um cliente</td></tr>
+              <tr><th>Notifica?</th><td class="yes">Sim</td><td class="no">Não</td><td class="no">Não</td></tr>
+              <tr><th>Rola pra cima?</th><td class="no">Sim</td><td class="no">Sim</td><td class="yes">Não</td></tr>
+              <tr><th>Achável depois?</th><td class="no">Não</td><td class="no">Não</td><td class="yes">Sim</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="sec">
+          <h2>O mesmo dia, nos três lugares</h2>
+          <div class="exch">
+            <div class="exl">Sílvio · durante o dia · Chat da pasta da Óticas Carol</div>
+            <div class="exline"><span class="who">CHAT</span><span class="msg">"Troquei a audiência da campanha 3, CPA caiu de R$20 pra R$18, acompanho amanhã." <em>— comunicação daquele cliente, fica no cliente.</em></span></div>
+          </div>
+          <div class="exch">
+            <div class="exl">Sílvio · fim do dia · Diário de Demandas (lugar único)</div>
+            <div class="exline"><span class="who">DIÁRIO</span><span class="msg">"Óticas Carol — CPA melhorou, ok. Nobre Fio — saldo acaba quinta, precisa recarga. Lourdes — pixel dessincronizou, investigo amanhã." <em>— o apanhado do dia inteiro, de todos os clientes, pra Carol agir.</em></span></div>
+          </div>
+          <div class="exch">
+            <div class="exl">Carol · de manhã · lê o Diário e cria a ação</div>
+            <div class="exline"><span class="who">DEM</span><span class="msg">Tarefa na DEM da Nobre Fio: "Solicitar recarga de saldo — vence quinta." <em>— a observação virou ação.</em></span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Regra rápida</h2>
+          <div class="callout"><p><b>Chat</b> é por cliente, no calor do momento. <b>Diário</b> é geral, no fim do dia, pra virar ação. <b>Tarefa (DEM)</b> é a ação em si. <b>Doc</b> é o que precisa durar.</p></div>
+        </div>
+      </section>
+
+      <!-- GUIA: COBRANÇA E ACOMPANHAMENTO -->
+      <section class="view" id="v-cobranca" style="--accent:var(--carol)">
+        <div class="ghead">
+          <div class="ey">CS · Acompanhamento</div>
+          <h1>Como cobrar o que foi combinado</h1>
+          <p>O cliente prometeu mandar as fotos até sexta. Ele não está no ClickUp e não vai se cobrar sozinho. Quem é responsável por aquilo <em>andar</em> é o CS. Então isso vira uma tarefa — mas de um tipo específico.</p>
+        </div>
+
+        <div class="sec">
+          <h2>O princípio</h2>
+          <div class="callout"><div class="ct">Quem é o dono</div><p>O dono da tarefa é <b>quem cobra</b>, não quem executa. O compromisso é do cliente, mas a tarefa é da Carol — porque a responsabilidade de fazer aquilo andar é dela.</p></div>
+        </div>
+
+        <div class="sec">
+          <h2>Como montar a tarefa de cobrança</h2>
+          <div class="plist">
+            <div class="pl"><div class="n" style="color:var(--carol)">◆</div><div class="txt"><b>Dono: Carol</b><span>Ela é a responsável por cobrar.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--carol)">◆</div><div class="txt"><b>Status: Aguardando</b><span>Marca que a bola está com o cliente — não é uma tarefa parada por nossa causa.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--carol)">◆</div><div class="txt"><b>Prazo: o dia de cobrar</b><span>Não o dia que o cliente "deveria" entregar — o dia em que a Carol puxa. Prometeu sexta? Prazo sexta de manhã.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--carol)">◆</div><div class="txt"><b>Nome com verbo de cobrança</b><span><code>Cobrar fotos do produto — prometido até sexta</code></span></div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Como acompanhar — a view "Aguardando Cliente"</h2>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft)">Uma view de nível de espaço com filtro <b style="color:var(--ink)">status = Aguardando</b>. Ali a Carol vê, num lugar só, tudo que estamos esperando de todos os clientes, ordenado por data. É o painel de cobrança dela — e o que vence hoje já aparece também em "Minhas Tarefas do Dia".</p>
+            <div class="callout"><div class="ct">Por que não um Doc</div><p>Doc não avisa, não vence e não sobe na fila. Por isso cobrança nunca mora em Doc — mora em <b>tarefa com status e prazo</b>.</p></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>O histórico de cada cobrança</h2>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft)">Cada vez que a Carol cobra, ela <b style="color:var(--ink)">comenta na própria tarefa</b>: "cobrei dia 10, cliente disse que manda quinta". A tarefa carrega a linha do tempo da cobrança sem virar tarefa nova. O comentário registra; a tarefa é que vence e reaparece na fila.</p>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Atalho: vários itens, uma janela só</h2>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft);margin-bottom:2px">Se a reunião gerou cinco compromissos com a mesma janela ("antes da próxima reunião"), não crie cinco tarefas. Uma tarefa com checklist:</p>
+            <div class="exch">
+              <div class="exl">Cobrar pendências da reunião 10/08 · Carol · prazo quarta</div>
+              <div class="exline"><span class="who">☐</span><span class="msg">Fotos novas do produto</span></div>
+              <div class="exline"><span class="who">☐</span><span class="msg">Aprovar os 3 roteiros</span></div>
+              <div class="exline"><span class="who">☐</span><span class="msg">Acesso do Google Meu Negócio</span></div>
+            </div>
+            <div class="callout"><div class="ct">A regra</div><p>Datas de cobrança <b>diferentes</b> → tarefas separadas. <b>Mesma</b> janela → uma tarefa com checklist. Um item que vence sexta e outro daqui a duas semanas não cabem juntos — um atrasaria visualmente por causa do outro.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GUIA: REUNIÕES -->
+      <section class="view" id="v-reuniao" style="--accent:var(--doc)">
+        <div class="ghead">
+          <div class="ey">Reuniões · Ata → ações</div>
+          <h1>O que fazer com o que sai de uma reunião</h1>
+          <p>Você sai da reunião com uma pilha de itens misturados — coisas nossas e coisas do cliente. O descarregamento acontece em dois momentos, e essa separação é o que evita bagunça.</p>
+        </div>
+
+        <div class="sec">
+          <h2>Momento 1 — na hora: a ata</h2>
+          <div class="card">
+            <p style="font-size:14.5px;color:var(--ink-soft);margin-bottom:2px">Enquanto está fresco, joga tudo no Doc <b style="color:var(--ink)">REU · Reuniões</b> do cliente, com dois títulos separados:</p>
+            <div class="exch">
+              <div class="exl">REU · Reuniões da Óticas Carol · 10/08</div>
+              <div class="exline"><span class="who">NOSSO</span><span class="msg">Refazer criativo da campanha X · Ajustar público da campanha Y</span></div>
+              <div class="exline"><span class="who">CLIENTE</span><span class="msg">Mandar fotos novas (até sexta) · Aprovar os 3 roteiros (até quarta) · Passar acesso do Google Meu Negócio</span></div>
+            </div>
+            <div class="callout"><div class="ct">O que a ata é</div><p>Registro <b>congelado</b>. Fica lá mesmo depois de tudo feito, como memória do que foi combinado. É referência, não ferramenta de acompanhamento.</p></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2>Momento 2 — logo depois: converter em tarefas</h2>
+          <div class="plist">
+            <div class="pl"><div class="n" style="color:var(--doc)">→</div><div class="txt"><b>Ações nossas</b><span>Viram tarefas na DEM. Dono = quem faz (você, Sílvio), prazo, status A fazer.</span></div></div>
+            <div class="pl"><div class="n" style="color:var(--doc)">→</div><div class="txt"><b>Compromissos do cliente</b><span>Viram tarefas na DEM. Dono = Carol, status Aguardando, prazo = o dia de cobrar. <b style="color:var(--carol)">(Ver o guia Cobrança e acompanhamento.)</b></span></div></div>
+          </div>
+          <div class="callout"><div class="ct">Não é digitação dupla</div><p>O <b>Doc</b> é a ata — o que foi combinado, pra sempre. A <b>tarefa</b> é o rastreamento vivo de um item, que fecha quando resolve. Funções diferentes, ciclos de vida diferentes.</p></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+const DEST = {
+  chat:    {name:"Chat",     v:"--chat",    desc:"Conversa do dia: otimização, alerta, dúvida, alinhamento. Notifica e fica registrado."},
+  dem:     {name:"DEM",      v:"--dem",     desc:"Ação com dono e prazo. Toda tarefa que precisa de status e cobrança."},
+  doc:     {name:"Doc",      v:"--doc",     desc:"Conhecimento congelado: Estratégia, atas de Reunião, Acessos. O que precisa ser reconstruível."},
+  diario:  {name:"Diário",   v:"--diario",  desc:"Resumo do dia: o que mudou, o que quebrou, o que funcionou. Lido toda manhã pela Carol."},
+};
+const routeRows = [
+  ["Conversa do dia, otimização, alerta, dúvida","chat"],
+  ["Ação com dono e prazo","dem"],
+  ["Estratégia do cliente (congelada, revisada 1×/mês)","doc"],
+  ["Ata de reunião","doc"],
+  ["Senha e acesso (sensível)","doc"],
+  ["Resumo diário: o que mudou, quebrou, funcionou","diario"],
+];
+
+const PEOPLE = {
+  rener:{
+    name:"Rener", role:"Fundador", accent:"--rener",
+    obj:"Direcionar a empresa, manter os clientes crescendo e o caixa saudável. É quem decide prioridade e destrava o que travou. Onde o sistema tem uma dúvida sem dono, ela chega aqui.",
+    meta:[["Frente","Estratégia · Comercial · Gestão"],["Decisão","Prioridade e destravamento"]],
+    groups:{
+      "Diária":[
+        {n:"Decisão das órfãs",f:"2–3 min",d:["dem"],
+         why:"Nada pode ficar sem dono ou sem prazo. Se ficar, para de andar e ninguém percebe.",
+         how:"Abrir a view <b>Precisa de Decisão</b>. Cada tarefa sem dono/prazo: dar dono, dar prazo (um dos 3 baldes) ou arquivar. É a primeira coisa do dia."},
+        {n:"Primeira hora comercial",f:"manhã",d:["dem"],
+         why:"Comercial que não é feito todo dia vira zero no fim do mês. Consistência acima de intensidade.",
+         how:"Prospecção, follow-up de lead e de proposta. O que virar ação entra na lista <b>PIP · Pipeline de Leads</b>."},
+        {n:"WhatsApp com clientes",f:"ao longo do dia",d:["chat"],
+         why:"Relacionamento é retenção. O cliente que sente proximidade não escuta concorrente.",
+         how:"Suporte e conversa direta com cliente. O que for decisão ou alinhamento relevante, sobe pro <b>Chat da pasta</b> do cliente pra ficar registrado."},
+        {n:"Atualizar o ClickUp",f:"fim do dia",d:["dem"],
+         why:"O sistema só é confiável se refletir a realidade. ClickUp desatualizado é pior que não ter.",
+         how:"Marcar concluídos, criar as tarefas que apareceram no dia e ainda não estão registradas."},
+      ],
+      "Semanal":[
+        {n:"Weekly com o Sílvio",f:"terça · 1h–1h30",d:["dem"],
+         why:"É o ritual que sustenta todo o resto. Sem a weekly acontecendo sem falta, o sistema morre.",
+         how:"Revisar Esta Semana e Backlog, alinhar por cliente, definir prioridades. Decisões viram tarefa na hora. Ata no Doc <b>WKL</b> do Interno."},
+        {n:"Reuniões de alinhamento com clientes",f:"conforme cadência",d:["doc"],
+         why:"Cliente alinhado renova. Reunião sem registro é reunião perdida.",
+         how:"Cada reunião gera ata no Doc <b>REU · Reuniões</b> do cliente, datada. As ações que saírem viram tarefa na DEM daquele cliente."},
+        {n:"Resumo semanal dos clientes",f:"sexta",d:["chat"],
+         why:"O cliente precisa ver valor toda semana, não só no relatório mensal.",
+         how:"Sílvio puxa os dados; você monta o resumo e envia. Registra no <b>Chat da pasta</b> do cliente o que foi comunicado."},
+        {n:"Roteiros de anúncio",f:"3 por semana",d:["dem"],
+         why:"Criativo é o que mais move resultado. Fluxo constante de roteiro é o que alimenta a máquina.",
+         how:"Cada roteiro é uma tarefa na DEM do cliente correspondente, com o briefing no corpo."},
+        {n:"Revisão do Backlog",f:"na weekly · ~15 min",d:["dem"],
+         why:"Backlog não revisado vira cemitério. A revisão é o que mantém ele consciente.",
+         how:"Abrir a view <b>Backlog</b>. O que virou relevante ganha prazo; o que morreu, arquiva."},
+        {n:"Pedir indicação",f:"2–3 clientes",d:["dem"],
+         why:"Indicação é o lead mais barato e mais quente que existe. Só não vem porque ninguém pede.",
+         how:"Escolher 2–3 clientes satisfeitos e pedir indicação. Registrar como tarefa pra não esquecer o follow-up."},
+      ],
+      "Quinzenal":[
+        {n:"Revisão de estratégia por cliente",f:"rotativo",d:["doc"],
+         why:"O Chat acumula aprendizado solto. A cada quinzena, esse aprendizado precisa virar estratégia congelada.",
+         how:"Um punhado de clientes por vez. Puxar do Chat o que funciona e o que não funciona, e congelar no Doc <b>EST · Estratégia</b> do cliente."},
+        {n:"1:1 com o Sílvio",f:"~30 min",d:["doc"],
+         why:"A weekly é sobre clientes. O 1:1 é sobre a pessoa — como ele está, o que trava, pra onde quer ir.",
+         how:"Conversa de pessoa, não de tarefa. Anotações no Doc <b>WKL</b> do Interno."},
+      ],
+      "Mensal":[
+        {n:"Margem e caixa",f:"~30 min",d:["doc"],
+         why:"Agência quebra por não olhar número, não por falta de cliente. Este é o olho no caixa.",
+         how:"Revisar entrada, saída e margem no Doc <b>MAR · Margem e Caixa</b> do Financeiro."},
+        {n:"Funil e origem de vendas por cliente",f:"checklist da carteira",d:["doc"],
+         why:"Saber de onde veio a venda é o que separa a Vertente de uma agência comum. É o diferencial da casa.",
+         how:"Por cliente: de onde vieram as vendas do mês. Registrar a leitura no Doc de Estratégia de cada um."},
+      ],
+    }
+  },
+
+  silvio:{
+    name:"Sílvio", role:"Gestor de Tráfego", accent:"--silvio",
+    obj:"Fazer as campanhas performarem e — tão importante quanto — comunicar no mesmo dia o que descobre. Técnica sem comunicação vira crise: o problema existe, mas ninguém fica sabendo até o cliente reclamar.",
+    meta:[["Frente","Tráfego · Meta + Google"],["Regra nº1","Comunicar no mesmo dia"]],
+    groups:{
+      "Diária":[
+        {n:"Revisão de campanhas",f:"checklist · 3–4h",d:["chat"],
+         why:"É o trabalho central. A conta que não é olhada todo dia é a conta que sangra sem ninguém ver.",
+         how:"Passar Meta + Google de cada cliente (checklist). O que ajustar e por quê vai no <b>Chat da pasta</b> do cliente, na hora."},
+        {n:"Registrar otimizações no Chat",f:"a cada ajuste",d:["chat"],
+         why:"O Chat notifica, marca gente e aparece na caixa de entrada. É como a equipe fica sabendo sem você precisar avisar um a um.",
+         how:'No <b>Chat da pasta</b>, no formato: "mudei a audiência, CPA caiu de R$20 pra R$18, próximo passo testar criativo novo". O que + o número + o próximo passo.'},
+        {n:"Alimentar o Diário de Demandas",f:"antes de sair",d:["diario"],
+         why:"É o filtro do dia: o que precisa virar ação amanhã. A Carol lê de manhã e transforma em tarefa. Sem isso, o problema espera a weekly.",
+         how:"No <b>Diário de Demandas</b> (Interno): o que está ruim, o que precisa fazer, o que funcionou, o que travou. Todo dia, sem falta."},
+        {n:"Verificar as 3 prioridades do dia",f:"manhã",d:["dem"],
+         why:"Começar o dia sem saber o foco é como abrir o Meta e reagir ao que grita mais alto.",
+         how:"Abrir <b>Minhas Tarefas do Dia</b> e confirmar as 3 prioridades antes de mergulhar nas contas."},
+        {n:"Subir criativos conforme chegam",f:"conforme chega",d:["dem"],
+         why:"Criativo parado é dinheiro parado. O gargalo nunca pode ser o upload.",
+         how:"Assim que o social entrega, sobe nas campanhas. Se depender de algo, registra a pendência na DEM."},
+      ],
+      "Semanal":[
+        {n:"Weekly com o Rener",f:"terça",d:["dem"],
+         why:"É onde o tráfego e a estratégia se encontram. Você traz o que os números dizem.",
+         how:"Levar a leitura da semana por cliente. Decisões viram tarefa na hora."},
+        {n:"Puxar dados pro relatório",f:"checklist",d:["chat"],
+         why:"O resumo de sexta do Rener depende desses números. Atraso aqui atrasa o cliente.",
+         how:"Consolidar os números da semana de cada cliente (checklist) e passar pro Rener."},
+        {n:"Subir conteúdo do Instagram nas campanhas",f:"checklist",d:["dem"],
+         why:"Conteúdo orgânico que vira anúncio rende mais e mantém a presença consistente.",
+         how:"Conforme o social entrega, por cliente. Marcar no checklist."},
+      ],
+      "Quinzenal":[
+        {n:"1:1 com o Rener",f:"~30 min",d:["doc"],
+         why:"Espaço pra falar da sua rotina, do que está pesado, do que quer aprender — não dos clientes.",
+         how:"Conversa de pessoa. O que sair de combinado, fica anotado."},
+        {n:"Suporte técnico e CRM dos clientes",f:"~1–2h",d:["chat"],
+         why:"Pixel dessincronizado ou CRM quebrado derruba a mensuração de tudo. Manutenção evita crise.",
+         how:"Checar integrações e configurações. Problemas e soluções no Chat da pasta do cliente."},
+      ],
+      "Mensal":[
+        {n:"Revisão das contas de anúncio",f:"checklist da carteira",d:["chat"],
+         why:"BM, pixel e acesso quebram silenciosamente. A revisão mensal pega antes de virar problema.",
+         how:"Toda a carteira: checar BM, pixels e acessos. Registrar o que ajustou. Acesso novo ou trocado vai pro Doc <b>ACE</b> do cliente."},
+      ],
+    }
+  },
+
+  carol:{
+    name:"Carol", role:"Gestora de Projetos · CS", accent:"--carol",
+    obj:"Manter a informação fluindo e o cliente sentindo proximidade. É a ponte entre o que acontece no tráfego e o que o cliente percebe. Opera sobre as pastas de todos os clientes — captura, organiza e mantém a relação quente.",
+    meta:[["Horário","Meio período · 8h–11h"],["Papel","Ponte tráfego ↔ cliente"]],
+    groups:{
+      "Diária":[
+        {n:"Captura dos grupos",f:"8h–8h15",d:["dem"],
+         why:"Demanda que nasce no WhatsApp e não é capturada, se perde. Esta é a porta de entrada do sistema.",
+         how:"Varrer os grupos e jogar cada demanda na <b>DEM do cliente certo</b>. Sem julgar se é importante — capturar primeiro, decidir depois. Dono e prazo podem ficar vazios (o Rener decide)."},
+        {n:"Ler o Diário de Demandas",f:"manhã",d:["diario","dem"],
+         why:"É aqui que o que o Sílvio (e o João) descobriram ontem vira ação hoje. Sem essa leitura, o alerta morre no Diário.",
+         how:"Ler o <b>Diário de Demandas</b>. O que precisa virar ação, você cria como tarefa na <b>DEM</b> do cliente correspondente."},
+        {n:"Triagem de dúvidas simples",f:"ao longo da manhã",d:["chat"],
+         why:"Nem tudo precisa chegar no Rener ou no Sílvio. Resolver o simples na hora libera todo mundo.",
+         how:"Responder o que dá pra resolver. Escalar o resto pra pessoa certa via <b>Chat da pasta</b>."},
+        {n:"Cobrar o que está Aguardando",f:"manhã",d:["dem"],
+         why:"Compromisso do cliente que ninguém cobra, não acontece. A cobrança no dia certo é o que faz a reunião virar resultado.",
+         how:'Abrir a view <b>Aguardando Cliente</b> e cobrar o que vence hoje. Registrar cada cobrança como comentário na própria tarefa. Detalhes no guia <b>Cobrança e acompanhamento</b>.'},
+      ],
+      "Semanal":[
+        {n:"Segunda — feedback e resultado",f:"checklist da carteira",d:["chat"],
+         why:"Começar a semana sabendo como cada cliente está é o que permite agir antes de virar problema.",
+         how:"Por cliente (checklist): pedir feedback e o número de vendas da semana. Registrar no <b>Chat da pasta</b>."},
+        {n:"Quarta — pequena conquista",f:"checklist da carteira",d:["chat"],
+         why:"O cliente precisa perceber valor no meio da semana, não só no relatório. Proximidade se constrói assim.",
+         how:"Por cliente: mandar uma vitória da semana — um criativo que rendeu, um CPA que caiu. Pelo <b>Chat da pasta</b>."},
+        {n:"Sexta — proximidade",f:"checklist da carteira",d:["chat"],
+         why:"Fechar a semana com o cliente mantém a relação quente e antecipa insatisfação.",
+         how:"Atualização leve de projeto, por cliente. Pelo <b>Chat da pasta</b>."},
+        {n:"Organizar a agenda comercial do Rener",f:"~30 min",d:["dem"],
+         why:"A primeira hora comercial do Rener só rende se a semana dele estiver encaixada.",
+         how:"Revisar a semana seguinte do Rener, encaixar reuniões e follow-ups."},
+      ],
+      "Quinzenal":[
+        {n:"Levantar upsell",f:"~20 min",d:["dem"],
+         why:"O cliente satisfeito quase sempre pode comprar mais. Só não compra porque ninguém oferece.",
+         how:"Varrer a carteira e apontar 1–2 oportunidades de aumento de escopo. Registrar como tarefa pro Rener decidir."},
+      ],
+      "Mensal":[
+        {n:"Temperatura da carteira",f:"checklist da carteira",d:["doc"],
+         why:"Cliente não avisa que vai sair — ele esfria antes. A temperatura mensal pega o esfriamento a tempo.",
+         how:"Por cliente: uma nota de satisfação/risco. Sinalizar os que estão esfriando pro Rener. Registrar a leitura."},
+      ],
+    }
+  },
+
+  joao:{
+    name:"João", role:"Gestor de Tráfego Júnior", accent:"--joao",
+    obj:"Aprender a ler as contas. Nesta primeira fase, o trabalho é observar, registrar o que vê e perguntar. Ainda NÃO mexe nas campanhas — a força aqui é ganhar olho clínico antes de ganhar a mão.",
+    meta:[["Fase atual","1 · Observação"],["Contas","Apenas as designadas"]],
+    groups:{
+      "Diária":[
+        {n:"Revisão diária das contas designadas",f:"só as suas contas",d:["chat"],
+         why:"Antes de otimizar, é preciso enxergar. Esta fase constrói a leitura: o que é normal, o que é sinal de alerta.",
+         how:"Só <b>olhar</b> as contas designadas: CPA, gasto do dia, saldo, se a campanha está rodando. Anotar o que chamou atenção. Nada de mexer."},
+        {n:"Registrar o que observou no Diário",f:"antes de sair",d:["diario"],
+         why:"O que você vê só tem valor se chegar em quem decide. O Diário é como sua observação vira ação de alguém.",
+         how:'No <b>Diário de Demandas</b>: "conta X — CPA subiu de R$12 pra R$19", "conta Y — saldo acaba quinta". Fato observado, sem precisar propor solução ainda.'},
+        {n:"Avisar o Sílvio quando algo precisa de ação",f:"na hora",d:["chat"],
+         why:"Se você viu algo urgente, não espera. Mas também não age sozinho ainda — quem executa é o Sílvio.",
+         how:"Registrou no Diário e é urgente? Marca o <b>Sílvio no Chat da pasta</b> do cliente e aponta o que viu. Ele decide e executa."},
+        {n:"Perguntar quando tiver dúvida",f:"sempre que precisar",d:["chat"],
+         why:"Pergunta na fase de aprendizado não é fraqueza, é o trabalho. O erro é adivinhar e mexer.",
+         how:"Dúvida sobre o que está vendo? Pergunta pro Sílvio no <b>Chat da pasta</b>. Pergunta específica: qual conta, qual número, o que estranhou."},
+      ],
+    }
+  },
+};
+
+/* ---------- render helpers ---------- */
+function dtag(key){
+  const d=DEST[key];
+  return `<span class="dtag" style="--dc:var(${d.v})"><span class="d"></span>${d.name}</span>`;
+}
+function renderRoute(){
+  document.getElementById('routeTable').innerHTML = routeRows.map(([l,k])=>
+    `<tr><td>${l}</td><td>${dtag(k)}</td></tr>`).join('');
+}
+function renderLegend(){
+  document.getElementById('legendGrid').innerHTML = Object.entries(DEST).map(([k,d])=>
+    `<div class="leg" style="--dc:var(${d.v})"><div class="lh"><span class="d"></span><span class="nm">${d.name}</span></div><p>${d.desc}</p></div>`).join('');
+}
+
+const CAD_ORDER=["Diária","Semanal","Quinzenal","Mensal"];
+function renderPerson(key){
+  const p=PEOPLE[key];
+  let groups="";
+  for(const cad of CAD_ORDER){
+    const list=p.groups[cad]; if(!list) continue;
+    const cards=list.map(rt=>`
+      <div class="rt" data-cad="${cad}">
+        <div class="rt-head" role="button" tabindex="0" aria-expanded="false">
+          <span class="rt-tw">▶</span>
+          <span class="rt-name">${rt.n}</span>
+          <span class="rt-tags">${rt.d.map(dtag).join('')}<span class="freq">${rt.f}</span></span>
+        </div>
+        <div class="rt-body"><div class="rt-inner">
+          <div><div class="lbl">Por quê</div><p>${rt.why}</p></div>
+          <div><div class="lbl">Como e onde registrar</div><p>${rt.how}</p></div>
+        </div></div>
+      </div>`).join('');
+    groups+=`<div class="cad-group" data-cadgroup="${cad}">
+      <div class="cad-head"><h2>${cad}</h2><div class="ln"></div><span class="ct">${list.length}</span></div>
+      ${cards}</div>`;
+  }
+
+  let extra="";
+  if(key==="joao"){
+    extra=`
+    <div class="warn">
+      <h3>⛔ O que o João NÃO faz ainda</h3>
+      <ul>
+        <li><b>Não mexe em campanha</b> — não altera segmentação, criativo ou estrutura.</li>
+        <li><b>Não altera orçamento</b> — não sobe nem desce verba.</li>
+        <li><b>Não pausa nem ativa anúncio</b> — mesmo que pareça óbvio, registra e avisa o Sílvio.</li>
+        <li><b>Não sobe criativo</b> sem o Sílvio validar.</li>
+        <li><b>Não fala de estratégia direto com o cliente</b> — isso passa pelo Sílvio ou pelo Rener.</li>
+      </ul>
+    </div>
+    <div class="track">
+      <h3>Como o João evolui</h3>
+      <div class="steps">
+        <div class="step now"><span class="sn">1</span><div class="st"><b>Observação<span class="badge">fase atual</span></b><span>Revisão diária + registro no Diário. Não toca em nada. Constrói leitura das contas.</span></div></div>
+        <div class="step next"><span class="sn">2</span><div class="st"><b>Sugestão</b><span>Começa a propor otimizações no Diário. O Sílvio executa e explica o porquê.</span></div></div>
+        <div class="step next"><span class="sn">3</span><div class="st"><b>Execução assistida</b><span>Executa otimizações simples com o Sílvio revisando antes.</span></div></div>
+      </div>
+      <div style="margin-top:16px;padding-top:15px;border-top:1px solid var(--line)">
+        <div class="lbl" style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px">Para avançar de fase</div>
+        <p style="font-size:14px;color:var(--ink-soft)">Certificação Meta Ads · alimentar o Diário todo dia sem falha · comunicar problema no mesmo dia · cumprir a rotina sem precisar de lembrete.</p>
+      </div>
+    </div>`;
+  }
+
+  return `
+    <div class="phead" style="--accent:var(${p.accent})">
+      <span class="role-tag">${p.role}</span>
+      <h1>${p.name}</h1>
+      <p class="obj">${p.obj}</p>
+      <div class="meta">${p.meta.map(m=>`<span class="chip">${m[0]}: <b>${m[1]}</b></span>`).join('')}</div>
+    </div>
+    <div class="filter" style="--accent:var(${p.accent})" data-filter>
+      <button class="fbtn on" data-f="all">Todas</button>
+      ${CAD_ORDER.filter(c=>p.groups[c]).map(c=>`<button class="fbtn" data-f="${c}">${c}</button>`).join('')}
+    </div>
+    ${groups}
+    ${extra}
+  `;
+}
+
+/* ---------- build nav + views ---------- */
+const navPeople=document.getElementById('navpeople');
+const mtabs=document.getElementById('mtabs');
+const main=document.querySelector('.wrap');
+
+// mobile: sistema + guias
+const staticTabs=[
+  ["como","Como funciona","#7E93A8"],
+  ["fluxo","Nova demanda","var(--dem)"],
+  ["anotar","Chat, Diário e Doc","var(--chat)"],
+  ["cobranca","Cobrança e CS","var(--carol)"],
+  ["reuniao","Reuniões","var(--doc)"],
+];
+mtabs.innerHTML=staticTabs.map(([k,l,c],i)=>
+  `<button class="mtab${i===0?' active':''}" data-go="${k}"><span class="dot" style="background:${c}"></span>${l}</button>`).join('');
+
+Object.entries(PEOPLE).forEach(([key,p])=>{
+  const v=getComputedStyle(document.documentElement).getPropertyValue(p.accent);
+  navPeople.insertAdjacentHTML('beforeend',
+    `<button class="nav-btn" data-go="${key}" style="--d:var(${p.accent})">
+       <span class="dot"></span>${p.name}<span class="nav-role">${p.role.split('·')[0].trim()}</span></button>`);
+  mtabs.insertAdjacentHTML('beforeend',
+    `<button class="mtab" data-go="${key}" style="--d:var(${p.accent})"><span class="dot"></span>${p.name}</button>`);
+  const sec=document.createElement('section');
+  sec.className='view'; sec.id='v-'+key;
+  sec.innerHTML=renderPerson(key);
+  main.appendChild(sec);
+});
+
+renderRoute(); renderLegend();
+
+/* ---------- interactions ---------- */
+function go(key){
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='v-'+key));
+  document.querySelectorAll('[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===key));
+  window.scrollTo({top:0,behavior:'instant'in window?'instant':'auto'});
+}
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-go]');
+  if(nav){go(nav.dataset.go);return;}
+
+  const head=e.target.closest('.rt-head');
+  if(head){
+    const rt=head.closest('.rt');
+    const open=rt.classList.toggle('open');
+    head.setAttribute('aria-expanded',open);
+    return;
+  }
+  const fb=e.target.closest('.fbtn');
+  if(fb){
+    const bar=fb.closest('[data-filter]');
+    bar.querySelectorAll('.fbtn').forEach(b=>b.classList.toggle('on',b===fb));
+    const f=fb.dataset.f;
+    const view=fb.closest('.view');
+    view.querySelectorAll('[data-cadgroup]').forEach(g=>{
+      g.style.display=(f==='all'||g.dataset.cadgroup===f)?'':'none';
+    });
+  }
+});
+document.addEventListener('keydown',e=>{
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('rt-head')){
+    e.preventDefault();e.target.click();
+  }
+});
+</script>
+</body>
+</html>
